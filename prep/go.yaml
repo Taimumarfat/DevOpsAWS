@@ -1,0 +1,42 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Parameters:
+  PgUserPassword:
+    Type: String
+    MinLength: "9"
+    MaxLength: "41"
+    AllowedPattern: "[a-zA-Z0-9]*"
+  RepositoryName:
+    Type: String
+    Default: pg23repo
+Resources:
+  User:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: ./iam-user.yaml
+      Parameters:
+        pUserPassword: !Ref PgUserPassword
+  UserRole:
+    DependsOn: User
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: ./iam-userrole.yaml
+      Parameters:
+        RepositoryName: !Ref RepositoryName
+  CodeCommitRepo:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: ./repo.yaml
+      Parameters:
+        RepositoryName: !Ref RepositoryName
+  CfnRole:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: ./iam-cfnrole.yaml
+  PipelineRole:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: ./iam-pipelinerole.yaml
+  S3Bucket:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: ./s3bucket.yaml
